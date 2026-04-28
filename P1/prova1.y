@@ -2,23 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-int yylex();
-void yyerror(const char *s);
+extern int yylex();
+void yyerror(const char *msg);
 %}
 
-%union {
-    int num;
-    char* str;
-}
-
-%token ERROR 
-%token <num> NUM
-%token <str> ID STRING
-%token PRINT CONCAT LENGTH
-%token ASSIGN
+%token NUM STRING ID
+%token PRINT LENGTH CONCAT
 %token PLUS MINUS TIMES DIV
-%token LPAREN RPAREN COMMA
+%token LPAR RPAR ASSIGN COMMA
+%token ERROR
 
 %left PLUS MINUS
 %left TIMES DIV
@@ -27,36 +19,42 @@ void yyerror(const char *s);
 
 %%
 
-program:
-    stmt_list
-;
+program
+    : stmt_list
+    ;
 
-stmt_list:
-      stmt
+stmt_list
+    : 
     | stmt_list stmt
-;
+    ;
 
-stmt:
-      ID ASSIGN expr '\n'
-    | PRINT expr '\n'
-    | PRINT string_expr '\n'
-    | expr '\n'
-;
+stmt
+    : expr
+    | ID ASSIGN expr
+    | PRINT LPAR args RPAR
+    ;
 
-expr:
-      NUM
-    | ID
-    | expr PLUS expr
+expr
+    : expr PLUS  expr
     | expr MINUS expr
     | expr TIMES expr
-    | expr DIV expr
-    | LPAREN expr RPAREN
-    | LENGTH LPAREN string_expr RPAREN
-;
+    | expr DIV   expr
+    | LPAR expr RPAR
+    | LENGTH LPAR expr RPAR
+    | CONCAT LPAR args RPAR
+    | atom
+    ;
 
-string_expr:
-      STRING
-    | CONCAT LPAREN string_expr COMMA string_expr RPAREN
-;
+args
+    : expr
+    | args COMMA expr
+    ;
+
+atom
+    : NUM
+    | STRING
+    | ID
+    ;
 
 %%
+

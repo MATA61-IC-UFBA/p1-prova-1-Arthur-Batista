@@ -1,50 +1,40 @@
 %{
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include "prova1.tab.h"
+#include <stdlib.h>
+#include <string.h>
 %}
 
-%%
+%option noyywrap
 
-"//".*            { }
-[ \t]+            { }
-
-\n                return '\n';
-
-"print"           return PRINT;
-"concat"          return CONCAT;
-"length"          return LENGTH;
-
-"+"               return PLUS;
-"-"               return MINUS;
-"*"               return TIMES;
-"/"               return DIV;
-"="               return ASSIGN;
-
-"("               return LPAREN;
-")"               return RPAREN;
-","               return COMMA;
-
-\"[^\"]*\"        {
-                    yylval.str = strdup(yytext);
-                    return STRING;
-                 }
-
-[0-9]+            {
-                    yylval.num = atoi(yytext);
-                    return NUM;
-                 }
-
-[a-zA-Z][a-zA-Z0-9]* {
-                    yylval.str = strdup(yytext);
-                    return ID;
-                 }
-
-.                 return ERROR;
+LETTER  [a-zA-Z]
+DIGIT   [0-9]
+ID      {LETTER}({LETTER}|{DIGIT}|_)*
+NUM     {DIGIT}+
+STRING  \"[^\"\n]*\"
+COMMENT "//"[^\n]*
 
 %%
 
-int yywrap() {
-    return 1;
-}
+{COMMENT}       {}
+[ \t\n]+        {}
+
+"print"         { return PRINT;  }
+"concat"        { return CONCAT; }
+"length"        { return LENGTH; }
+
+{NUM}           { return NUM;    }
+{STRING}        { return STRING; }
+{ID}            { return ID;     }
+
+"+"             { return PLUS;   }
+"-"             { return MINUS;  }
+"*"             { return TIMES;  }
+"/"             { return DIV;    }
+"="             { return ASSIGN; }
+"("             { return LPAR;   }
+")"             { return RPAR;   }
+","             { return COMMA;  }
+
+.               { return ERROR;  }
+
+%%
